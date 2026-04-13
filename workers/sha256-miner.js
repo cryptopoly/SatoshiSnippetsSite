@@ -96,7 +96,9 @@ self.onmessage = function (e) {
 
   if (type === 'start') {
     running = true;
-    const { blockData, difficulty } = e.data;
+    const { blockData, difficulty, salt } = e.data;
+    // Append a random salt so each mining run explores different hashes
+    const input = salt ? blockData + '|' + salt : blockData;
     const target = '0'.repeat(difficulty);
     const batchSize = 5000;
 
@@ -112,8 +114,8 @@ self.onmessage = function (e) {
       }
 
       for (let i = 0; i < batchSize; i++) {
-        const input = blockData + nonce;
-        const hash = sha256(input);
+        const candidate = input + nonce;
+        const hash = sha256(candidate);
         hashCount++;
 
         recentHashes.push({ nonce, hash });
